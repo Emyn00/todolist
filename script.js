@@ -3,7 +3,9 @@ const cont = document.getElementById("taskCont")
 const input = document.getElementById("input")
 
 const tasks = []
-localStorage.setItem("tasks", JSON.stringify(tasks))
+if(localStorage.getItem("tasks") === null) {
+    localStorage.setItem("tasks", JSON.stringify(tasks))
+}
 
 const rearrangeTask = () => {
     cont.innerHTML = ""
@@ -63,6 +65,7 @@ const createTask = () => {
 
     let storedTasks = JSON.parse(localStorage.getItem("tasks"))
     tasks.unshift(task)
+    storedTasks.unshift(task)
     localStorage.setItem("tasks", JSON.stringify(storedTasks))
 
     input.value = ""
