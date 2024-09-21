@@ -1,7 +1,0 @@
-const jedan = document.getElementById("jedan")
-const dva = document.getElementById("dva")
-const tri = document.getElementById("tri")
-console.log(jedan)
-console.log(dva)
-console.log(tri)
-console.log(tri.parentNode.parentNode)
