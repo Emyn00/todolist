@@ -3,6 +3,7 @@ const cont = document.getElementById("taskCont")
 const input = document.getElementById("input")
 
 const tasks = []
+localStorage.setItem("tasks", JSON.stringify(tasks))
 
 const rearrangeTask = () => {
     cont.innerHTML = ""
@@ -60,8 +61,9 @@ const createTask = () => {
     btnCont.appendChild(iks)
     iks.addEventListener("click",() => deleteTask(task))
 
+    let storedTasks = JSON.parse(localStorage.getItem("tasks"))
     tasks.unshift(task)
-
+    localStorage.setItem("tasks", JSON.stringify(storedTasks))
 
     input.value = ""
 
