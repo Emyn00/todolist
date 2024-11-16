@@ -2,41 +2,60 @@ const button = document.getElementById("button");
 const cont = document.getElementById("taskCont")
 const input = document.getElementById("input")
 
-const tasks = []
-if(localStorage.getItem("tasks") === null) {
-    localStorage.setItem("tasks", JSON.stringify(tasks))
-}
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
 
 const rearrangeTask = () => {
     cont.innerHTML = ""
-    tasks.forEach((task) => {
+    tasks.forEach((taskObject) => {
+        const task = createElements(taskObject)
         cont.appendChild(task)
+
     })
 }
 
-const deleteTask = (task) => {
-    if (tasks.indexOf(task) > -1) {
-        tasks.splice(tasks.indexOf(task), 1);
+const deleteTask = (taskObject) => {
+    if (tasks.indexOf(taskObject) > -1) {
+        tasks.splice(tasks.indexOf(taskObject), 1);
+        localStorage.setItem("tasks", JSON.stringify(tasks))
         rearrangeTask();
     }
 };
 
-const markTask = (task, tacnik) => {
-    task.classList.add("ended");
-    tacnik.style.display = "none";
-    tasks.push(tasks.splice(tasks.indexOf(task), 1)[0]); 
-    rearrangeTask();
+const markTask = (taskObject) => {
+    if (tasks.indexOf(taskObject) > -1) {
+        tasks[tasks.indexOf(taskObject)].isDone = true
+        tasks.push(tasks.splice(tasks.indexOf(taskObject), 1)[0]);
+    }
+    localStorage.setItem("tasks", JSON.stringify(tasks))
+    rearrangeTask()
 };
+
 
 const createTask = () => {
 
-    if(input.value === "") {
+    if (input.value === "") {
         return
     }
 
+    if(tasks.length === 5) {
+        alert("You cannot have more than 5 tasks!")
+        return
+    }
+
+    const taskValue = input.value
+    const task = createElements({value: taskValue, isDone: false})
+    cont.appendChild(task)
+    tasks.unshift({value: taskValue, isDone: false})
+    localStorage.setItem("tasks", JSON.stringify(tasks))
+
+    input.value = ""
+
+    rearrangeTask()
+}
+
+const createElements = (taskObject) => {
     const task = document.createElement("div");
     task.classList.add("task")
-    cont.appendChild(task);
 
     const textCont = document.createElement("div")
     textCont.classList.add("text-cont")
@@ -49,28 +68,46 @@ const createTask = () => {
     const text = document.createElement("p")
     text.classList.add("text")
     textCont.appendChild(text)
-    text.innerHTML = input.value
+    text.innerHTML = taskObject.value
 
     const tacnik = document.createElement("img")
     tacnik.src = "tacnik.png"
     tacnik.classList.add("symbol")
     btnCont.appendChild(tacnik)
-    tacnik.addEventListener("click",() => markTask(task, tacnik))
+    tacnik.addEventListener("click", () => markTask(taskObject))
+
+    if (taskObject.isDone) {
+        task.classList.add("ended");
+        tacnik.classList.add("none")
+    }
 
     const iks = document.createElement("img")
     iks.src = "iks.png"
     iks.classList.add("symbol")
     btnCont.appendChild(iks)
-    iks.addEventListener("click",() => deleteTask(task))
+    iks.addEventListener("click", () => deleteTask(taskObject))
 
-    let storedTasks = JSON.parse(localStorage.getItem("tasks"))
-    tasks.unshift(task)
-    storedTasks.unshift(task)
-    localStorage.setItem("tasks", JSON.stringify(storedTasks))
-
-    input.value = ""
-
-    rearrangeTask()
+    return task
 }
 
+const apiUrl = 'https://zenquotes.io/api/random';
+
+fetch(apiUrl)
+.then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+})
+.then(data => {
+    const quote = data[0].q;
+    const author = data[0].a;
+    input.placeholder = author + ": " + quote 
+})
+.catch(error => {
+    console.error('Došlo je do greške:', error);
+});
+
 button.addEventListener("click", createTask)
+
+document.addEventListener("DOMContentLoaded", rearrangeTask)
